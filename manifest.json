@@ -1,0 +1,9 @@
+{
+  "diseases": {
+    "heart": "target",
+    "diabetes": "Outcome",
+    "flu": "Flu_Target",
+    "kidney_disease": "classification",
+    "liver_failure": "Dataset"
+  }
+}

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Disease Clinical AI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #0ea5e9;
+            --primary-glow: rgba(14, 165, 233, 0.5);
+            --secondary: #8b5cf6;
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            --danger: #ef4444;
+            --success: #10b981;
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --input-border: #cbd5e1;
+            --mesh-1: radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
+            --mesh-2: radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            --mesh-3: radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
+        }
+
+        body.theme-dark {
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --secondary: #a78bfa;
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: #334155;
+            --mesh-1: radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.1) 0px, transparent 50%);
+            --mesh-2: radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+            --mesh-3: radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: var(--mesh-1), var(--mesh-2), var(--mesh-3);
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            padding: 2.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+            .glass-panel:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 15px 40px var(--primary-glow);
+            }
+
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+            header h1 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                background: linear-gradient(to right, #38bdf8, #a78bfa);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                letter-spacing: -0.5px;
+            }
+
+        .theme-select {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+            .theme-select option {
+                background-color: #1e293b;
+                color: white;
+            }
+
+        .top-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .nav-btn {
+            padding: 0.8rem 1.8rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+            .nav-btn:hover {
+                color: var(--text-main);
+                transform: translateY(-2px);
+            }
+
+            .nav-btn.active {
+                background: var(--primary);
+                color: white;
+                border-color: var(--primary);
+                box-shadow: 0 4px 15px var(--primary-glow);
+            }
+
+        main {
+            flex: 1;
+            width: 95%;
+            max-width: 1300px;
+            margin: 1rem auto 3rem auto;
+        }
+
+        .view-section {
+            display: none !important;
+            animation: fadeIn 0.5s ease;
+        }
+
+            .view-section.active {
+                display: block !important;
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2.5rem;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-main);
+        }
+
+            h2::before {
+                content: '';
+                display: block;
+                width: 4px;
+                height: 24px;
+                background: linear-gradient(to bottom, var(--primary), var(--secondary));
+                border-radius: 4px;
+            }
+
+        .sample-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--secondary), #7c3aed);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s;
+        }
+
+            .sample-btn:hover {
+                transform: translateY(-2px) scale(1.02);
+                box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+            }
+
+        .mode-toggle, .tabs {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-btn, .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            transition: all 0.3s;
+        }
+
+            .mode-btn.active, .tab-btn.active {
+                color: white;
+                background: var(--primary);
+                box-shadow: 0 2px 10px var(--primary-glow);
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-group.full {
+                grid-column: 1 / -1;
+            }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea {
+            background: var(--input-bg);
+            color: var(--text-main);
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+            input:focus, textarea:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 4px var(--primary-glow);
+            }
+
+            textarea.chatbox {
+                min-height: 120px;
+                resize: vertical;
+                border-left: 4px solid var(--primary);
+            }
+
+        .btn-submit {
+            grid-column: 1 / -1;
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+            .btn-submit:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
+            }
+
+        #ai-loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+            #ai-loading-overlay.active {
+                display: flex;
+                opacity: 1;
+            }
+
+        .spinner-ring {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(56, 189, 248, 0.2);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+            .spinner-ring::after {
+                content: '✚';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 1.5rem;
+                color: var(--primary);
+                animation: pulse 1.5s infinite;
+            }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 15px var(--primary);
+            }
+        }
+
+        .result-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border: 1px solid;
+        }
+
+        .pos {
+            background: rgba(239, 68, 68, 0.05);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .neg {
+            background: rgba(16, 185, 129, 0.05);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: var(--glass-bg);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            background: rgba(0,0,0,0.05);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ai-loading-overlay">
+        <div class="spinner-ring"></div>
+        <h2 style="color: white; margin-bottom: 0.5rem; font-size: 1.8rem;">Ensemble AI Processing</h2>
+        <p style="color: #94a3b8; font-size: 1.1rem;">Calculating SHAP game-theory parameters & predicting vitals...</p>
+    </div>
+
+    <header>
+        <h1>Roxi Clinical Diagnoser</h1>
+        <select class="theme-select" id="themeSelector" onchange="changeTheme()">
+            <option value="dark">🌑 Dark Engine</option>
+            <option value="light">☀️ Light Engine</option>
+        </select>
+    </header>
+
+    <div class="top-nav">
+        <button class="nav-btn active" onclick="switchView('engine')">🩺 Diagnostic Engine</button>
+        <button class="nav-btn" onclick="switchView('database'); loadHistory();">🗄️ Clinical Database</button>
+        <button class="nav-btn" onclick="switchView('metrics')">📊 MLOps Metrics</button>
+    </div>
+
+    <main>
+        <div id="view-engine" class="view-section active">
+            <div class="grid-layout">
+                <!-- INPUT FORM -->
+                <div class="glass-panel" style="position: relative;">
+                    <h2>Clinical Inputs</h2>
+                    <button type="button" class="sample-btn" onclick="generateSample()">🧪 Auto-Fill Sample</button>
+
+                    <div class="mode-toggle">
+                        <button type="button" class="mode-btn active" onclick="setMode('simple')">🤖 NLP Chatbox</button>
+                        <button type="button" class="mode-btn" onclick="setMode('advanced')">⚕️ Raw Vitals</button>
+                    </div>
+
+                    <div class="tabs">
+                        <button type="button" class="tab-btn active" onclick="setDisease('heart')">Cardiology</button>
+                        <button type="button" class="tab-btn" onclick="setDisease('diabetes')">Endocrinology</button>
+                        <button type="button" class="tab-btn" onclick="setDisease('flu')">Respiratory</button>
+                    </div>
+
+                    <form action="/diagnose" method="POST" onsubmit="showLoader()" novalidate>
+                        <input type="hidden" name="scan_type" id="scan_type" value="heart">
+                        <input type="hidden" name="input_mode" id="input_mode" value="simple">
+
+                        <div id="form-heart-simple" class="form-grid">
+                            <div class="form-group"><label>Age</label><input type="number" step="any" name="simple_heart_age" id="sh_age" value="45"></div>
+                            <div class="form-group"><label>Sex (1=M, 0=F)</label><input type="number" step="any" name="simple_heart_sex" id="sh_sex" value="1"></div>
+                            <div class="form-group full"><label>Patient Symptom Description</label><textarea class="chatbox" name="symptoms_heart" id="sh_chat" placeholder="Describe symptoms..."></textarea></div>
+                            <button type="submit" class="btn-submit">Initialize Diagnosis Sequence</button>
+                        </div>
+                        <div id="form-heart-advanced" class="form-grid" style="display: none;">
+                            <div class="form-group"><label>Age</label><input type="number" step="any" name="heart_age" id="ah_age"></div><div class="form-group"><label>Sex</label><input type="number" step="any" name="heart_sex" id="ah_sex"></div>
+                            <div class="form-group"><label>Chest Pain (0-3)</label><input type="number" step="any" name="heart_cp" id="ah_cp"></div><div class="form-group"><label>Resting BP</label><input type="number" step="any" name="heart_trestbps" id="ah_bp"></div>
+                            <div class="form-group"><label>Cholesterol</label><input type="number" step="any" name="heart_chol" id="ah_chol"></div><div class="form-group"><label>Fasting Sugar</label><input type="number" step="any" name="heart_fbs" id="ah_fbs"></div>
+                            <div class="form-group"><label>Resting ECG</label><input type="number" step="any" name="heart_restecg" id="ah_ecg"></div><div class="form-group"><label>Max HR</label><input type="number" step="any" name="heart_thalach" id="ah_hr"></div>
+                            <div class="form-group"><label>Ex. Angina</label><input type="number" step="any" name="heart_exang" id="ah_exang"></div><div class="form-group"><label>ST Dep</label><input type="number" step="any" name="heart_oldpeak" id="ah_oldpeak"></div>
+                            <div class="form-group"><label>Slope (0-2)</label><input type="number" step="any" name="heart_slope" id="ah_slope"></div><div class="form-group"><label>Vessels (0-4)</label><input type="number" step="any" name="heart_ca" id="ah_ca"></div>
+                            <div class="form-group"><label>Thal (0-3)</label><input type="number" step="any" name="heart_thal" id="ah_thal"></div><button type="submit" class="btn-submit">Initialize Diagnosis Sequence</button>
+                        </div>
+
+                        <div id="form-diabetes-simple" class="form-grid" style="display: none;">
+                            <div class="form-group"><label>Age</label><input type="number" step="any" name="simple_diabetes_age" id="sd_age"></div><div class="form-group"><label>BMI</label><input type="number" step="any" name="simple_diabetes_bmi" id="sd_bmi"></div>
+                            <div class="form-group full"><label>Patient Symptom Description</label><textarea class="chatbox" name="symptoms_diabetes" id="sd_chat"></textarea></div><button type="submit" class="btn-submit">Initialize Diagnosis Sequence</button>
+                        </div>
+                        <div id="form-diabetes-advanced" class="form-grid" style="display: none;">
+                            <div class="form-group"><label>Pregnancies</label><input type="number" step="any" name="diabetes_Pregnancies" id="ad_preg"></div><div class="form-group"><label>Glucose</label><input type="number" step="any" name="diabetes_Glucose" id="ad_gluc"></div>
+                            <div class="form-group"><label>Blood Pressure</label><input type="number" step="any" name="diabetes_BloodPressure" id="ad_bp"></div><div class="form-group"><label>Skin Thickness</label><input type="number" step="any" name="diabetes_SkinThickness" id="ad_skin"></div>
+                            <div class="form-group"><label>Insulin</label><input type="number" step="any" name="diabetes_Insulin" id="ad_ins"></div><div class="form-group"><label>BMI</label><input type="number" step="any" name="diabetes_BMI" id="ad_bmi"></div>
+                            <div class="form-group"><label>Pedigree</label><input type="number" step="any" name="diabetes_DiabetesPedigreeFunction" id="ad_ped"></div><div class="form-group"><label>Age</label><input type="number" step="any" name="diabetes_Age" id="ad_age"></div>
+                            <button type="submit" class="btn-submit">Initialize Diagnosis Sequence</button>
+                        </div>
+
+                        <div id="form-flu-simple" class="form-grid" style="display: none;">
+                            <div class="form-group"><label>Age</label><input type="number" step="any" name="simple_flu_age" id="sf_age"></div><div class="form-group"><label>Temperature</label><input type="number" step="any" name="simple_flu_temp" id="sf_temp"></div>
+                            <div class="form-group full"><label>Patient Symptom Description</label><textarea class="chatbox" name="symptoms_flu" id="sf_chat"></textarea></div><button type="submit" class="btn-submit">Initialize Diagnosis Sequence</button>
+                        </div>
+                        <div id="form-flu-advanced" class="form-grid" style="display: none;">
+                            <div class="form-group"><label>Age</label><input type="number" step="any" name="flu_Age" id="af_age"></div><div class="form-group"><label>Fever (1/0)</label><input type="number" step="any" name="flu_Fever" id="af_fev"></div>
+                            <div class="form-group"><label>Cough (1/0)</label><input type="number" step="any" name="flu_Cough" id="af_cough"></div><div class="form-group"><label>Fatigue (1/0)</label><input type="number" step="any" name="flu_Fatigue" id="af_fatigue"></div>
+                            <div class="form-group"><label>Sore Throat (1/0)</label><input type="number" step="any" name="flu_SoreThroat" id="af_sore"></div><div class="form-group"><label>Body Ache (1/0)</label><input type="number" step="any" name="flu_BodyAche" id="af_ache"></div>
+                            <div class="form-group"><label>Short Breath (1/0)</label><input type="number" step="any" name="flu_ShortnessOfBreath" id="af_short"></div><div class="form-group"><label>Oxygen Sat %</label><input type="number" step="any" name="flu_OxygenSaturation" id="af_oxy"></div>
+                            <button type="submit" class="btn-submit">Initialize Diagnosis Sequence</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- EVALUATION INTERFACE (NO CHART) -->
+                <div class="glass-panel" id="ui-result-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin:0;">Evaluation Interface</h2>
+                        {% if show_results and not error %}
+                        <button type="button" onclick="generatePDF()" style="background: var(--primary); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px var(--primary-glow); transition: 0.3s;">📄 Export Report</button>
+                        {% endif %}
+                    </div>
+
+                    {% if not show_results %}
+                    <div style="height: 300px; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 1.1rem;">System standing by for telemetry...</div>
+                    {% else %}
+                    {% if error %}
+                    <div class="result-box pos"><h3>System Error</h3><p>{{ error }}</p></div>
+                    {% else %}
+                    <div class="result-box {% if result.is_positive %}pos{% else %}neg{% endif %}" style="font-size: 1.2rem;">
+                        <h3 style="text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">{{ result.disease }} DIAGNOSIS</h3>
+                        <p style="font-weight: 700;">{{ '⚠️ HIGH RISK DETECTED' if result.is_positive else '✅ NORMAL BOUNDS' }} | Confidence: {{ result.confidence }}</p>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; background: var(--input-bg); padding: 1.2rem; border-radius: 8px; border: 1px solid var(--input-border);">
+                        <p style="color: var(--text-main); font-size: 1rem; line-height: 1.5;"><strong>🧠 System Reasoning:</strong> <span style="opacity: 0.9;">{{ result.xai_text }}</span></p>
+                    </div>
+
+                    {% if result.is_positive %}
+                    <hr style="border-color: var(--input-border); margin: 2rem 0 1rem 0;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">System Recommendations</p>
+                    <div style="background: var(--input-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--input-border);">
+                        <p><strong>🔬 Labs:</strong> {{ result.test }}</p>
+                        <p style="margin-top: 0.5rem;"><strong>📋 Protocols:</strong></p>
+                        <ul style="margin-left: 1.5rem;">{% for item in result.prescriptions %}<li>{{ item }}</li>{% endfor %}</ul>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div id="view-database" class="view-section glass-panel">
+            <h2>Cloud Operations Log (MongoDB)</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Live telemetry sync established with remote cluster.</p>
+            <table>
+                <thead><tr><th>Timestamp</th><th>Disease Focus</th><th>Diagnosis</th><th>Confidence</th></tr></thead>
+                <tbody id="db-table-body"><tr><td colspan="4" style="text-align: center;">Fetching secure records...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div id="view-metrics" class="view-section glass-panel">
+            <h2>Pipeline Telemetry Dashboard</h2>
+            {% for disease, scores in metrics.items() %}
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; text-transform: capitalize; color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid var(--input-border); padding-bottom: 0.5rem;">{{ disease }} Engine</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+                <div style="background: var(--input-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--input-border); text-align: center;"><div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Accuracy</div><div style="font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-top: 0.5rem;">{{ scores.accuracy }}%</div></div>
+                <div style="background: var(--input-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--input-border); text-align: center;"><div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Precision</div><div style="font-size: 1.8rem; font-weight: 700; color: var(--secondary); margin-top: 0.5rem;">{{ scores.precision }}%</div></div>
+                <div style="background: var(--input-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--input-border); text-align: center;"><div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Recall</div><div style="font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-top: 0.5rem;">{{ scores.recall }}%</div></div>
+                <div style="background: var(--input-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--input-border); text-align: center;"><div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">F1-Score</div><div style="font-size: 1.8rem; font-weight: 700; color: var(--secondary); margin-top: 0.5rem;">{{ scores.f1 }}%</div></div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- HIDDEN MASTERPIECE PDF TEMPLATE -->
+    {% if show_results and not error %}
+    <div id="pdf-template" style="display: none; background: white; color: #1e293b; padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+        <div style="border-bottom: 3px solid #0ea5e9; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="color: #0f172a; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Roxi Clinical Diagnoser</h1>
+                <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Official Clinical Diagnostic Report</p>
+            </div>
+            <div style="text-align: right; color: #64748b; font-size: 12px;">
+                <p style="margin: 0; font-weight: bold; color: #0f172a;">Date: <span id="pdf-date"></span></p>
+                <p style="margin: 4px 0 0 0;">System Architect: Roxi (Huzaifa Ahmed Khan)</p>
+            </div>
+        </div>
+
+        <div style="background: {% if result.is_positive %}#fef2f2{% else %}#f0fdf4{% endif %}; border: 2px solid {% if result.is_positive %}#ef4444{% else %}#10b981{% endif %}; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 30px;">
+            <h2 style="margin: 0; color: {% if result.is_positive %}#b91c1c{% else %}#15803d{% endif %}; font-size: 22px; text-transform: uppercase; letter-spacing: 1px;">DIAGNOSIS: {{ result.disease }}</h2>
+            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 16px; color: #334155;">STATUS: {{ 'POSITIVE (HIGH RISK DETECTED)' if result.is_positive else 'NEGATIVE (NORMAL BOUNDS)' }}</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #475569;">Calculated Confidence Interval: <strong>{{ result.confidence }}</strong></p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: #0ea5e9; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">1. Patient Clinical Inputs (Raw Vitals)</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <tbody>
+                    {% set count = 0 %}
+                    <tr>
+                        {% for key, val in result.patient_data.items() %}
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; width: 25%; text-transform: capitalize;">{{ key.replace('_', ' ') }}</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; width: 25%;">{{ val }}</td>
+                        {% set count = count + 1 %}
+                        {% if count % 2 == 0 %}
+                    </tr>
+                    <tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: #0ea5e9; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">2. Biomarker Analysis (SHAP Game Theory)</h3>
+            <div style="text-align: center; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: #fafafa;">
+                <img src="{{ url_for('static', filename='shap_charts/shap_' + result.disease.lower() + '.png') }}" alt="SHAP XAI Breakdown" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: #0ea5e9; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">3. System Reasoning & Management Protocols</h3>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 13px; color: #334155; line-height: 1.5;"><strong>Ensemble Reasoning:</strong> {{ result.xai_text }}</p>
+            </div>
+            {% if result.is_positive %}
+            <div style="background: #fff1f2; padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                <p style="margin: 0 0 10px 0; font-size: 13px; color: #9f1239;"><strong>Required Labs / Imaging:</strong> {{ result.test }}</p>
+                <p style="margin: 0 0 5px 0; font-size: 13px; color: #9f1239;"><strong>Management Directives:</strong></p>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #9f1239; line-height: 1.5;">
+                    {% for item in result.prescriptions %}
+                    <li>{{ item }}</li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 50px; padding-top: 15px; border-top: 1px solid #cbd5e1; text-align: center; font-size: 11px; color: #94a3b8; line-height: 1.6;">
+            <p style="margin: 0;">This report is computationally generated by the Roxi medical diagnoser Ensemble and does not replace professional medical advice.</p>
+            <p style="margin: 4px 0 0 0; font-weight: bold; color: #64748b;">Project Creation & Engineering: Created and Designed by Huzaifa Ahmed Khan</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        function showLoader() { document.getElementById('ai-loading-overlay').classList.add('active'); }
+
+        function generatePDF() {
+            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString();
+            const element = document.getElementById('pdf-template');
+            element.style.display = 'block';
+            const opt = { margin: 0.5, filename: 'Clinical_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+            html2pdf().set(opt).from(element).save().then(() => { element.style.display = 'none'; });
+        }
+
+        let currentMode = 'simple';
+        let currentDisease = 'heart';
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelector').value;
+            document.body.className = theme === 'dark' ? 'theme-dark' : '';
+            localStorage.setItem('theme', theme);
+        }
+
+        if (localStorage.getItem('theme') !== 'light') { document.getElementById('themeSelector').value = 'dark'; document.body.className = 'theme-dark'; }
+        else { document.getElementById('themeSelector').value = 'light'; }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function setMode(mode) {
+            currentMode = mode; document.getElementById('input_mode').value = mode;
+            const btns = document.querySelectorAll('.mode-btn');
+            btns[0].classList.toggle('active', mode === 'simple'); btns[1].classList.toggle('active', mode === 'advanced');
+            updateView();
+        }
+
+        function setDisease(disease) {
+            currentDisease = disease; document.getElementById('scan_type').value = disease;
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(btn => btn.classList.remove('active')); event.currentTarget.classList.add('active');
+            updateView();
+        }
+
+        function updateView() {
+            document.querySelectorAll('.form-grid').forEach(el => el.style.display = 'none');
+            document.getElementById(`form-${currentDisease}-${currentMode}`).style.display = 'grid';
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/history');
+                const data = await res.json();
+                const tbody = document.getElementById('db-table-body');
+                if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; opacity: 0.7;">No records found in the database.</td></tr>'; }
+                else { tbody.innerHTML = data.map(r => `<tr><td><span style="opacity:0.7">${r.date}</span></td><td style="font-weight:600; text-transform: uppercase;">${r.disease}</td><td>${r.prediction}</td><td style="color:var(--primary); font-weight:bold;">${r.conf}</td></tr>`).join(''); }
+            } catch (err) { document.getElementById('db-table-body').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ef4444;">Error fetching data from MongoDB.</td></tr>'; }
+        }
+
+        function generateSample() {
+            const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+            const randFloat = (min, max) => (Math.random() * (max - min) + min).toFixed(1);
+
+            const heartStories = ["I've been feeling severe pressure in my chest recently. My left arm aches and my heart races wildly whenever I try to walk up the stairs.", "Sometimes I get a sharp, stabbing pain in my chest when I'm just sitting down. I feel dizzy and short of breath.", "My heart has been fluttering a lot lately. I get exhausted very quickly, and there is a heavy tightness in the center of my chest."];
+            const diabetesStories = ["I am constantly thirsty no matter how much water I drink. I have to use the restroom 10 times a day, my vision is blurry, and I feel incredibly fatigued.", "I've lost weight recently without even trying. I always feel hungry, my mouth is bone dry, and cuts seem to take forever to heal.", "My hands and feet have been tingling a lot recently. I feel exhausted all the time and I'm drinking way more water than usual."];
+            const fluStories = ["My whole body is aching intensely. I have a dry, hacking cough, a terrible sore throat, and I am shivering with a high fever.", "I woke up with a pounding headache and chills. My nose is extremely runny, and my chest burns whenever I try to cough.", "I can't stop coughing and my temperature is over 102 degrees. I feel totally drained of energy and my muscles hurt constantly."];
+
+            if (currentDisease === 'heart') {
+                if (currentMode === 'simple') { document.getElementById('sh_age').value = rand(55, 75); document.getElementById('sh_sex').value = rand(0, 1); document.getElementById('sh_chat').value = heartStories[Math.floor(Math.random() * heartStories.length)]; }
+                else { document.getElementById('ah_age').value = rand(55, 75); document.getElementById('ah_sex').value = rand(0, 1); document.getElementById('ah_bp').value = rand(145, 180); document.getElementById('ah_cp').value = rand(1, 3); document.getElementById('ah_chol').value = rand(240, 310); document.getElementById('ah_fbs').value = rand(0, 1); document.getElementById('ah_ecg').value = rand(0, 2); document.getElementById('ah_hr').value = rand(110, 140); document.getElementById('ah_exang').value = rand(0, 1); document.getElementById('ah_oldpeak').value = randFloat(1.5, 3.5); document.getElementById('ah_slope').value = rand(0, 2); document.getElementById('ah_ca').value = rand(1, 3); document.getElementById('ah_thal').value = rand(1, 3); }
+            } else if (currentDisease === 'diabetes') {
+                if (currentMode === 'simple') { document.getElementById('sd_age').value = rand(45, 65); document.getElementById('sd_bmi').value = randFloat(30, 42); document.getElementById('sd_chat').value = diabetesStories[Math.floor(Math.random() * diabetesStories.length)]; }
+                else { document.getElementById('ad_age').value = rand(45, 65); document.getElementById('ad_preg').value = rand(0, 6); document.getElementById('ad_gluc').value = rand(150, 220); document.getElementById('ad_bp').value = rand(85, 110); document.getElementById('ad_skin').value = rand(25, 45); document.getElementById('ad_ins').value = rand(120, 300); document.getElementById('ad_bmi').value = randFloat(30, 42); document.getElementById('ad_ped').value = randFloat(0.6, 1.4); }
+            } else if (currentDisease === 'flu') {
+                if (currentMode === 'simple') { document.getElementById('sf_age').value = rand(20, 50); document.getElementById('sf_temp').value = randFloat(101.5, 103.5); document.getElementById('sf_chat').value = fluStories[Math.floor(Math.random() * fluStories.length)]; }
+                else { document.getElementById('af_age').value = rand(20, 50); document.getElementById('af_oxy').value = rand(88, 93); document.getElementById('af_fev').value = 1; document.getElementById('af_cough').value = 1; document.getElementById('af_fatigue').value = 1; document.getElementById('af_sore').value = 1; document.getElementById('af_ache').value = 1; document.getElementById('af_short').value = rand(0, 1); }
+            }
+
+            const btn = document.querySelector('.sample-btn'); const oldText = btn.innerHTML;
+            btn.style.background = 'linear-gradient(135deg, #10b981, #059669)'; btn.innerHTML = '✅ Data Injected!';
+            setTimeout(() => { btn.style.background = 'linear-gradient(135deg, var(--secondary), #7c3aed)'; btn.innerHTML = oldText; }, 1500);
+        }
+    </script>
+</body>
+</html>
